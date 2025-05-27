@@ -1,12 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Task } from './types/Task'
 import TaskItem from './components/TaskItem'
 import './App.css'
 
 function App() {
-  const [tasks, setTasks] = useState<Task[]>([])
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    // Load tasks from localStorage on initial render
+    const savedTasks = localStorage.getItem('tasks')
+    return savedTasks ? JSON.parse(savedTasks) : []
+  })
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [newTaskDescription, setNewTaskDescription] = useState('')
+
+  // Save tasks to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks))
+  }, [tasks])
 
   const addTask = (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,14 +43,15 @@ function App() {
     setTasks(tasks.filter(task => task.id !== id))
   }
 
-  // Get current date in the required format
-  const today = new Date()
-  const dateString = today.toLocaleDateString('en-US', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })
+  const formatDate = () => {
+    const date = new Date()
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })
+  }
 
   return (
     <div className="min-h-screen bg-white py-8 px-4">
@@ -50,7 +60,7 @@ function App() {
           <h1 className="text-2xl font-normal mb-1 text-[24px]">
             Your plans for <span className="italic">today</span>
           </h1>
-          <p className="text-[32px] font-medium mt-[4px]">{dateString}</p>
+          <p className="text-[32px] font-medium mt-[4px]">{formatDate()}</p>
         </header>
 
         <div className="mb-6">
