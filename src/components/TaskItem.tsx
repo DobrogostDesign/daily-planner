@@ -10,7 +10,7 @@ interface TaskItemProps {
 
 const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete }) => {
   return (
-    <div className="flex items-start gap-3 p-4 bg-[#F9FAFB] mb-2 rounded group">
+    <div className="flex items-start gap-3 p-4 bg-white mb-2 rounded-lg shadow-[0_0_5px_rgba(3,7,18,0.05)] group">
       <div className="relative flex items-center justify-center mt-1">
         <input
           type="checkbox"
