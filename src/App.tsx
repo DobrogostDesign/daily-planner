@@ -3,6 +3,7 @@ import type { Task } from './types/Task'
 import TaskItem from './components/TaskItem'
 import EmptyState from './components/EmptyState'
 import './App.css'
+import { CornerDownLeft } from 'lucide-react';
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -106,35 +107,41 @@ function App() {
               ))
             )}
           </div>
-
           <form onSubmit={addTask} className="mt-8">
-            <input
-              ref={titleInputRef}
-              type="text"
-              placeholder="Write you task here"
-              value={newTaskTitle}
-              onChange={(e) => {
-                setNewTaskTitle(e.target.value)
-                setIsError(false)
-              }}
-              className={`w-full px-0 py-2 outline-none bg-transparent placeholder-gray-400 ${
-                isError ? 'placeholder-red-500' : ''
-              }`}
-            />
-            <div className="flex gap-4 items-center mt-2">
-              <input
+            <div className="flex gap-4 item-start">
+              <div className="flex flex-col gap-4 flex-1">
+                <input
+                  ref={titleInputRef}
+                  type="text"
+                  placeholder="Write you task here"
+                  value={newTaskTitle}
+                  onChange={(e) => {
+                    setNewTaskTitle(e.target.value)
+                    setIsError(false)
+                  }}
+                  className={`font-normal outline-none bg-transparent placeholder-gray-400 ${
+                    isError ? 'placeholder-red-500' : ''
+                  }`}
+                />
+               <input
                 type="text"
                 placeholder="Description"
                 value={newTaskDescription}
                 onChange={(e) => setNewTaskDescription(e.target.value)}
-                className="flex-1 px-0 py-2 outline-none placeholder-gray-400 bg-transparent"
+                className="text-sm font-normal flex-1 outline-none placeholder-gray-400 bg-transparent"
               />
+              </div>
+              <div className="flex flex-col flex-none h-full mt-auto">
               <button
                 type="submit"
-                className="bg-black text-white py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors text-sm whitespace-nowrap"
-              >
-                Add task <span className="ml-1">↵</span>
+                className="flex items-center gap-2 bg-gray-950 text-white py-2 px-4 rounded-lg hover:opacity-85 transition-opacity whitespace-nowrap">
+                <span className='text-sm font-medium'>Add task</span>
+                <span className="flex items-center text-gray-400 gap-1 bg-gray-900 border border-gray-700 rounded-md px-1 h-5">
+                 <CornerDownLeft className="w-4 h-4" />
+                  <span className="text-xs">return</span>
+                </span>
               </button>
+              </div>
             </div>
           </form>
         </div>

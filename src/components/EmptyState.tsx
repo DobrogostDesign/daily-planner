@@ -1,14 +1,18 @@
 import React from 'react';
-import EmptyStateIcons from './EmptyStateIcons';
+import { Check } from 'lucide-react';
 
 const EmptyState: React.FC = () => {
   return (
-    <div className="bg-white rounded-lg shadow-[0_0_5px_rgba(3,7,18,0.05)] relative overflow-hidden">
-      <div className="py-16 pl-12">
-        <h3 className="text-base font-medium text-gray-900">Your day is empty</h3>
-        <p className="text-sm text-gray-500 mt-1">Add your first task for today</p>
+    <div className="rounded-lg border-dashed border-2 border-gray-200 px-4 py-2">
+      <div className="flex items-center gap-2">
+        <div className='relative flex items-center justify-center peer w-5 h-5 border-2 border-gray-200 border-dashed rounded-md'>
+          <Check 
+          className="absolute w-4 h-4 text-gray-300" 
+          strokeWidth={2}
+        /> </div>
+        <h3 className="text-sm flex-1 text-gray-500">Nothing scheduled for today</h3>
+        <p className="text-xs text-right w-1/3 text-gray-400 italic">“A journey of a thousand miles begin with a single step.” — Laozi</p>
       </div>
-      <EmptyStateIcons />
     </div>
   );
 };
