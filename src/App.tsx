@@ -4,6 +4,9 @@ import TaskItem from './components/TaskItem'
 import EmptyState from './components/EmptyState'
 import './App.css'
 import { CornerDownLeft } from 'lucide-react';
+import Sidebar from './components/Sidebar';
+import ScheduledJune from './pages/ScheduledJune';
+import ShoppingList from './pages/ShoppingList';
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -15,6 +18,15 @@ function App() {
   const [newTaskDescription, setNewTaskDescription] = useState('')
   const [isError, setIsError] = useState(false)
   const titleInputRef = useRef<HTMLInputElement>(null)
+  const [selectedIdx, setSelectedIdx] = useState(1); // default to Scheduled for June
+  const [scheduledTasks, setScheduledTasks] = useState<any[]>([]); // Replace any with your type if you have one
+  const [shoppingList, setShoppingList] = useState<any[]>([]); // Replace any with your type if you have one
+
+  const navItems = [
+    { icon: '/calendar.png', label: 'Plans for today', count: tasks.length },
+    { icon: '/schedule.png', label: 'Scheduled', count: scheduledTasks.length },
+    { icon: '/shoping.png', label: 'Shopping list', count: shoppingList.length },
+  ];
 
   // Check for new day and clean up completed tasks
   useEffect(() => {
@@ -83,69 +95,79 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        <header className="mb-12">
-          <h1 className="text-2xl font-normal mb-1 text-[24px]">
-            Your plans for <span className="italic">today</span>
-          </h1>
-          <p className="text-[32px] font-medium mt-[4px]">{formatDate()}</p>
-        </header>
-
-        <div className="mb-6">
-          <div className="space-y-1">
-            {tasks.length === 0 ? (
-              <EmptyState />
-            ) : (
-              tasks.map(task => (
-                <TaskItem
-                  key={task.id}
-                  task={task}
-                  onToggle={toggleTask}
-                  onDelete={deleteTask}
-                />
-              ))
-            )}
-          </div>
-          <form onSubmit={addTask} className="mt-8">
-            <div className="flex gap-4 item-start">
-              <div className="flex flex-col gap-4 flex-1">
-                <input
-                  ref={titleInputRef}
-                  type="text"
-                  placeholder="Write you task here"
-                  value={newTaskTitle}
-                  onChange={(e) => {
-                    setNewTaskTitle(e.target.value)
-                    setIsError(false)
-                  }}
-                  className={`font-normal outline-none bg-transparent placeholder-gray-400 ${
-                    isError ? 'placeholder-red-500' : ''
-                  }`}
-                />
-               <input
-                type="text"
-                placeholder="Description"
-                value={newTaskDescription}
-                onChange={(e) => setNewTaskDescription(e.target.value)}
-                className="text-sm font-normal flex-1 outline-none placeholder-gray-400 bg-transparent"
-              />
+    <div className="min-h-screen bg-gray-50 flex">
+      <Sidebar selectedIdx={selectedIdx} onSelect={setSelectedIdx} navItems={navItems} />
+      <main className="flex-1 py-8 px-4 flex justify-center">
+        <div className="max-w-2xl w-full">
+          {selectedIdx === 0 ? (
+            <>
+              <header className="mb-12">
+                <h1 className="text-2xl font-normal text-2xl">
+                  Your plans for <span className="italic">today</span>
+                </h1>
+                <p className="text-3xl font-medium">{formatDate()}</p>
+              </header>
+              <div className="mb-6">
+                <div className="space-y-1">
+                  {tasks.length === 0 ? (
+                    <EmptyState />
+                  ) : (
+                    tasks.map(task => (
+                      <TaskItem
+                        key={task.id}
+                        task={task}
+                        onToggle={toggleTask}
+                        onDelete={deleteTask}
+                      />
+                    ))
+                  )}
+                </div>
+                <form onSubmit={addTask} className="mt-8">
+                  <div className="flex gap-4 item-start">
+                    <div className="flex flex-col gap-4 flex-1">
+                      <input
+                        ref={titleInputRef}
+                        type="text"
+                        placeholder="Write you task here"
+                        value={newTaskTitle}
+                        onChange={(e) => {
+                          setNewTaskTitle(e.target.value)
+                          setIsError(false)
+                        }}
+                        className={`font-normal outline-none bg-transparent placeholder-gray-400 ${
+                          isError ? 'placeholder-red-500' : ''
+                        }`}
+                      />
+                     <input
+                      type="text"
+                      placeholder="Description"
+                      value={newTaskDescription}
+                      onChange={(e) => setNewTaskDescription(e.target.value)}
+                      className="text-sm font-normal flex-1 outline-none placeholder-gray-400 bg-transparent"
+                    />
+                    </div>
+                    <div className="flex flex-col flex-none h-full mt-auto">
+                    <button
+                      type="submit"
+                      className="flex items-center gap-2 bg-gray-950 text-white py-2 px-4 rounded-lg hover:opacity-85 transition-opacity whitespace-nowrap">
+                      <span className='text-sm font-medium'>Add task</span>
+                      <span className="flex items-center text-gray-400 gap-1 bg-gray-900 border border-gray-700 rounded-md px-1 h-5">
+                       <CornerDownLeft className="w-4 h-4" />
+                        <span className="text-xs">return</span>
+                      </span>
+                    </button>
+                    </div>
+                  </div>
+                </form>
               </div>
-              <div className="flex flex-col flex-none h-full mt-auto">
-              <button
-                type="submit"
-                className="flex items-center gap-2 bg-gray-950 text-white py-2 px-4 rounded-lg hover:opacity-85 transition-opacity whitespace-nowrap">
-                <span className='text-sm font-medium'>Add task</span>
-                <span className="flex items-center text-gray-400 gap-1 bg-gray-900 border border-gray-700 rounded-md px-1 h-5">
-                 <CornerDownLeft className="w-4 h-4" />
-                  <span className="text-xs">return</span>
-                </span>
-              </button>
-              </div>
-            </div>
-          </form>
+            </>
+          ) : selectedIdx === 1 ? (
+            <ScheduledJune />
+          ) : (
+            <ShoppingList />
+          )}
         </div>
-      </div>
+      </main>
     </div>
   )
 }
