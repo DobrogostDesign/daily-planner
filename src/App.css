@@ -15,3 +15,33 @@
 .shake {
   animation: shake 0,3s ease-in-out;
 }
+
+@keyframes fade-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(3rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-right {
+  animation: fade-in-right 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+@keyframes fade-out-right {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(3rem);
+  }
+}
+
+.animate-fade-out-right {
+  animation: fade-out-right 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}

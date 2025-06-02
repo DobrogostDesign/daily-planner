@@ -8,6 +8,8 @@ import Sidebar from './components/Sidebar';
 import ScheduledJune from './pages/ScheduledJune';
 import ShoppingList from './pages/ShoppingList';
 
+const TASK_ANIMATION_DURATION = 300;
+
 function App() {
   const [tasks, setTasks] = useState<Task[]>(() => {
     // Load tasks from localStorage on initial render
@@ -18,9 +20,11 @@ function App() {
   const [newTaskDescription, setNewTaskDescription] = useState('')
   const [isError, setIsError] = useState(false)
   const titleInputRef = useRef<HTMLInputElement>(null)
-  const [selectedIdx, setSelectedIdx] = useState(1); // default to Scheduled for June
+  const [selectedIdx, setSelectedIdx] = useState(0); // default to Plans for today
   const [scheduledTasks, setScheduledTasks] = useState<any[]>([]); // Replace any with your type if you have one
   const [shoppingList, setShoppingList] = useState<any[]>([]); // Replace any with your type if you have one
+  const [removingTaskId, setRemovingTaskId] = useState<string | null>(null);
+  const [lastAddedTaskId, setLastAddedTaskId] = useState<string | null>(null);
 
   const navItems = [
     { icon: '/calendar.png', label: 'Plans for today', count: tasks.length },
@@ -72,6 +76,8 @@ function App() {
     setNewTaskTitle('')
     setNewTaskDescription('')
     setIsError(false)
+    setLastAddedTaskId(newTask.id)
+    setTimeout(() => setLastAddedTaskId(null), TASK_ANIMATION_DURATION)
   }
 
   const toggleTask = (id: string) => {
@@ -80,9 +86,13 @@ function App() {
     ))
   }
 
-  const deleteTask = (id: string) => {
-    setTasks(tasks.filter(task => task.id !== id))
-  }
+  const handleDeleteTask = (id: string) => {
+    setRemovingTaskId(id);
+    setTimeout(() => {
+      setTasks(tasks => tasks.filter(task => task.id !== id));
+      setRemovingTaskId(null);
+    }, TASK_ANIMATION_DURATION);
+  };
 
   const formatDate = () => {
     const date = new Date()
@@ -113,12 +123,22 @@ function App() {
                     <EmptyState />
                   ) : (
                     tasks.map(task => (
-                      <TaskItem
+                      <div
                         key={task.id}
-                        task={task}
-                        onToggle={toggleTask}
-                        onDelete={deleteTask}
-                      />
+                        className={
+                          removingTaskId === task.id
+                            ? 'animate-fade-out-right pointer-events-none'
+                            : lastAddedTaskId === task.id
+                              ? 'opacity-0 translate-x-12 animate-fade-in-right'
+                              : 'opacity-100 translate-x-0 transition-all duration-300 ease-in-out'
+                        }
+                      >
+                        <TaskItem
+                          task={task}
+                          onToggle={toggleTask}
+                          onDelete={handleDeleteTask}
+                        />
+                      </div>
                     ))
                   )}
                 </div>
