@@ -7,61 +7,78 @@ import { CornerDownLeft } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import ScheduledJune from './pages/ScheduledJune';
 import ShoppingList from './pages/ShoppingList';
-
-const TASK_ANIMATION_DURATION = 300;
+import Completed from './pages/Completed';
+import { Toaster, toast } from 'sonner';
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>(() => {
-    // Load tasks from localStorage on initial render
     const savedTasks = localStorage.getItem('tasks')
     return savedTasks ? JSON.parse(savedTasks) : []
   })
+  
+  const [completedTasks, setCompletedTasks] = useState<Task[]>(() => {
+    const savedCompletedTasks = localStorage.getItem('completedTasks')
+    return savedCompletedTasks ? JSON.parse(savedCompletedTasks) : []
+  })
+  
+  const [streak, setStreak] = useState<number>(() => {
+    const savedStreak = localStorage.getItem('streak')
+    return savedStreak ? parseInt(savedStreak) : 0
+  })
+
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [newTaskDescription, setNewTaskDescription] = useState('')
   const [isError, setIsError] = useState(false)
   const titleInputRef = useRef<HTMLInputElement>(null)
-  const [selectedIdx, setSelectedIdx] = useState(0); // default to Plans for today
-  const [scheduledTasks, setScheduledTasks] = useState<any[]>([]); // Replace any with your type if you have one
-  const [shoppingList, setShoppingList] = useState<any[]>([]); // Replace any with your type if you have one
-  const [removingTaskId, setRemovingTaskId] = useState<string | null>(null);
-  const [lastAddedTaskId, setLastAddedTaskId] = useState<string | null>(null);
+  const [selectedIdx, setSelectedIdx] = useState(0)
+  const [scheduledTasks, setScheduledTasks] = useState<any[]>([])
+  const [shoppingList, setShoppingList] = useState<any[]>([])
 
   const navItems = [
-    { icon: '/calendar.png', label: 'Plans for today', count: tasks.length },
-    { icon: '/schedule.png', label: 'Scheduled', count: scheduledTasks.length },
-    { icon: '/shoping.png', label: 'Shopping list', count: shoppingList.length },
+    { icon: '/calendar.webp', label: 'Plans for today', count: tasks.length },
+    { icon: '/schedule.webp', label: 'Scheduled', count: scheduledTasks.length },
+    { icon: '/completed.webp', label: 'Completed', count: completedTasks.length },
+    { icon: '/shoping.webp', label: 'Shopping list', count: shoppingList.length },
   ];
 
-  // Check for new day and clean up completed tasks
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks))
+  }, [tasks])
+
+  useEffect(() => {
+    localStorage.setItem('completedTasks', JSON.stringify(completedTasks))
+  }, [completedTasks])
+
+  useEffect(() => {
+    localStorage.setItem('streak', streak.toString())
+  }, [streak])
+
   useEffect(() => {
     const lastCheckedDate = localStorage.getItem('lastCheckedDate')
     const today = new Date().toDateString()
 
     if (lastCheckedDate !== today) {
-      // It's a new day, remove completed tasks
-      setTasks(prevTasks => prevTasks.filter(task => !task.completed))
+      const tasksToMove = tasks.filter(task => task.completed)
+      if (tasksToMove.length > 0) {
+        setCompletedTasks(prev => [...prev, ...tasksToMove])
+        setTasks(prev => prev.filter(task => !task.completed))
+        
+        if (tasksToMove.length > 0) {
+          setStreak(prev => prev + 1)
+        } else {
+          setStreak(0)
+        }
+      }
+      
       localStorage.setItem('lastCheckedDate', today)
     }
-  }, []) // Run only on component mount
-
-  // Save tasks to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks))
-  }, [tasks])
+  }, [])
 
   const addTask = (e: React.FormEvent) => {
     e.preventDefault()
     if (!newTaskTitle.trim()) {
       setIsError(true)
-      // Reset error state after animation completes
       setTimeout(() => setIsError(false), 300)
-      // Remove and re-add shake class to retrigger animation
-      if (titleInputRef.current) {
-        titleInputRef.current.classList.remove('shake')
-        // Force reflow
-        void titleInputRef.current.offsetWidth
-        titleInputRef.current.classList.add('shake')
-      }
       return
     }
 
@@ -76,22 +93,46 @@ function App() {
     setNewTaskTitle('')
     setNewTaskDescription('')
     setIsError(false)
-    setLastAddedTaskId(newTask.id)
-    setTimeout(() => setLastAddedTaskId(null), TASK_ANIMATION_DURATION)
   }
 
   const toggleTask = (id: string) => {
-    setTasks(tasks.map(task =>
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ))
+    const taskToToggle = tasks.find(t => t.id === id)
+    if (taskToToggle) {
+      if (!taskToToggle.completed) {
+        const completedTask = { 
+          ...taskToToggle, 
+          completed: true,
+          completedAt: new Date().toISOString()
+        };
+        setTasks(prevTasks => prevTasks.filter(t => t.id !== id))
+        setCompletedTasks(prev => [...prev, completedTask])
+        
+        toast("Completed", {
+          description: taskToToggle.title,
+          action: {
+            label: "Undo",
+            onClick: () => {
+              setCompletedTasks(prev => prev.filter(t => t.id !== id))
+              setTasks(prev => [...prev, { ...taskToToggle, completed: false, completedAt: undefined }])
+            }
+          }
+        })
+      }
+    } else {
+      const completedTaskToToggle = completedTasks.find(t => t.id === id)
+      if (completedTaskToToggle) {
+        setCompletedTasks(prev => prev.filter(t => t.id !== id))
+        setTasks(prev => [...prev, { ...completedTaskToToggle, completed: false, completedAt: undefined }])
+      }
+    }
   }
 
   const handleDeleteTask = (id: string) => {
-    setRemovingTaskId(id);
-    setTimeout(() => {
-      setTasks(tasks => tasks.filter(task => task.id !== id));
-      setRemovingTaskId(null);
-    }, TASK_ANIMATION_DURATION);
+    setTasks(tasks => tasks.filter(task => task.id !== id));
+  };
+
+  const handleDeleteCompletedTask = (id: string) => {
+    setCompletedTasks(tasks => tasks.filter(task => task.id !== id));
   };
 
   const formatDate = () => {
@@ -123,22 +164,12 @@ function App() {
                     <EmptyState />
                   ) : (
                     tasks.map(task => (
-                      <div
+                      <TaskItem
                         key={task.id}
-                        className={
-                          removingTaskId === task.id
-                            ? 'animate-fade-out-right pointer-events-none'
-                            : lastAddedTaskId === task.id
-                              ? 'opacity-0 translate-x-12 animate-fade-in-right'
-                              : 'opacity-100 translate-x-0 transition-all duration-300 ease-in-out'
-                        }
-                      >
-                        <TaskItem
-                          task={task}
-                          onToggle={toggleTask}
-                          onDelete={handleDeleteTask}
-                        />
-                      </div>
+                        task={task}
+                        onToggle={toggleTask}
+                        onDelete={handleDeleteTask}
+                      />
                     ))
                   )}
                 </div>
@@ -169,7 +200,7 @@ function App() {
                     <div className="flex flex-col flex-none h-full mt-auto">
                     <button
                       type="submit"
-                      className="flex items-center gap-2 bg-gray-950 text-white py-2 px-4 rounded-lg hover:opacity-85 transition-opacity whitespace-nowrap">
+                      className="flex items-center gap-2 bg-gray-950 text-white py-2 px-4 rounded-lg hover:opacity-85 whitespace-nowrap">
                       <span className='text-sm font-medium'>Add task</span>
                       <span className="flex items-center text-gray-400 gap-1 bg-gray-900 border border-gray-700 rounded-md px-1 h-5">
                        <CornerDownLeft className="w-4 h-4" />
@@ -183,11 +214,20 @@ function App() {
             </>
           ) : selectedIdx === 1 ? (
             <ScheduledJune />
+          ) : selectedIdx === 2 ? (
+            <Completed
+              tasks={completedTasks}
+              onToggle={toggleTask}
+              onDelete={handleDeleteCompletedTask}
+              streak={streak}
+              taskCount={completedTasks.length}
+            />
           ) : (
             <ShoppingList />
           )}
         </div>
       </main>
+      <Toaster position="bottom-center" />
     </div>
   )
 }

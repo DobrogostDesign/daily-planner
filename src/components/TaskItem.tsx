@@ -1,7 +1,6 @@
 import React from 'react';
 import type { Task } from '../types/Task';
-import { Check } from 'lucide-react';
-import { X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 interface TaskItemProps {
   task: Task;
@@ -29,13 +28,16 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete }) => {
           {task.title}
         </h3>
         {task.description && (
-          <p className={`mt-0.5 text-xs ${task.completed ? 'text-gray-300' : 'text-gray-500'}`}>
+          <p className={`mt-0.5 text-xs ${task.completed ? 'line-through text-gray-300' : 'text-gray-500'}`}>
             {task.description}
           </p>
         )}
       </div>
-      <button className="peer w-5 h-5 relative flex items-center justify-center"
-        onClick={() => onDelete(task.id)}>
+      <button 
+        className="peer w-5 h-5 relative flex items-center justify-center"
+        onClick={() => onDelete(task.id)}
+        aria-label="Delete task"
+      >
         <X 
           className="absolute w-4 h-4 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity" 
           strokeWidth={2}
