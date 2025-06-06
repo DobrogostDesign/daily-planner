@@ -4,4 +4,5 @@ export interface Task {
   description?: string;
   completed: boolean;
   completedAt?: string; // ISO date string when task was completed
+  dueDate?: string;
 } 
