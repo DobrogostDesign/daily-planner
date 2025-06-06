@@ -8,6 +8,7 @@ import ScheduledJune from './pages/ScheduledJune';
 import ShoppingList from './pages/ShoppingList';
 import Completed from './pages/Completed';
 import { useTasks } from './hooks/useTasks';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function App() {
   const {
@@ -21,6 +22,8 @@ export default function App() {
     deleteTask,
     deleteCompletedTask,
   } = useTasks();
+
+  useDocumentTitle(tasks);
 
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [scheduledTasks] = useState<any[]>([]);
